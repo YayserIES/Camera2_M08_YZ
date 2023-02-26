@@ -17,29 +17,22 @@ import java.util.ArrayList;
 import java.util.Objects;
 
 public class ViewPage extends PagerAdapter {
-
     Context context;
-
     ArrayList<String> imgPath;
-
     LayoutInflater layoutInflater;
-
     public ViewPage(Context context,ArrayList<String> imgPath){
         this.context = context;
         this.imgPath = imgPath;
         layoutInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
     }
-
     @Override
     public int getCount() {
         return imgPath.size();
     }
-
     @Override
     public boolean isViewFromObject(@NonNull View view, @NonNull Object object) {
         return view == object;
     }
-
     @NonNull
     @Override
     public Object instantiateItem(@NonNull ViewGroup contain, final int position){

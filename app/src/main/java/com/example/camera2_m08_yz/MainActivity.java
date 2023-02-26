@@ -31,6 +31,7 @@ import android.view.Surface;
 import android.view.TextureView;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.Toast;
 
 import java.io.File;
@@ -47,7 +48,6 @@ import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
-    private static final String TAG = "ApiCamera";
     private static final SparseIntArray ORIENTATIONS = new SparseIntArray();
     private Button buttonTakePhoto;
     private Button buttonGallery ;
@@ -65,7 +65,6 @@ public class MainActivity extends AppCompatActivity {
     private CameraCaptureSession captureSession;
     private CaptureRequest.Builder captureRB;
 
-
     static
     {
         ORIENTATIONS.append(Surface.ROTATION_0,90);
@@ -73,32 +72,24 @@ public class MainActivity extends AppCompatActivity {
         ORIENTATIONS.append(Surface.ROTATION_180,270);
         ORIENTATIONS.append(Surface.ROTATION_270,180);
     }
-
-
-
-
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
-
         textureListener = new TextureView.SurfaceTextureListener() {
             @Override
             public void onSurfaceTextureAvailable(SurfaceTexture surface, int width, int height) {
                 //open your camera here
                 openCamera();
             }
-
             @Override
             public void onSurfaceTextureSizeChanged(SurfaceTexture surface, int width, int height) {
                 // Transform you image captured size according to the surface width and height
             }
-
             @Override
             public boolean onSurfaceTextureDestroyed(SurfaceTexture surface) {
                 return false;
             }
-
             @Override
             public void onSurfaceTextureUpdated(SurfaceTexture surface) {
             }
@@ -124,21 +115,16 @@ public class MainActivity extends AppCompatActivity {
             }
         });
     }
-
     private final CameraDevice.StateCallback stateCallback = new CameraDevice.StateCallback() {
         @Override
         public void onOpened(CameraDevice camera) {
-            //This is called when the camera is open
-            Log.e(TAG, "onOpened");
             camaraD = camera;
             createCameraPreview();
         }
-
         @Override
         public void onDisconnected(CameraDevice camera) {
             camaraD.close();
         }
-
         @Override
         public void onError(CameraDevice camera, int error) {
             camaraD.close();
@@ -153,13 +139,11 @@ public class MainActivity extends AppCompatActivity {
             createCameraPreview();
         }
     };
-
     protected void startBackgroundThread() {
         handlerThread = new HandlerThread("Camera Background");
         handlerThread.start();
         handler = new Handler(handlerThread.getLooper());
     }
-
     protected void stopBackgroundThread() {
         handlerThread.quitSafely();
         try {
@@ -170,10 +154,8 @@ public class MainActivity extends AppCompatActivity {
             e.printStackTrace();
         }
     }
-
     protected void takePicture() {
         if (null == camaraD) {
-            Log.e(TAG, "cameraDevice is null");
             return;
         }
         CameraManager manager = (CameraManager) getSystemService(Context.CAMERA_SERVICE);
@@ -206,7 +188,6 @@ public class MainActivity extends AppCompatActivity {
             if (!folder.exists()){
                 folder.mkdirs();
             }
-
             ImageReader.OnImageAvailableListener readerListener = new ImageReader.OnImageAvailableListener() {
                 @Override
                 public void onImageAvailable(ImageReader imageReader) {
@@ -245,7 +226,7 @@ public class MainActivity extends AppCompatActivity {
                 @Override
                 public void onCaptureCompleted(CameraCaptureSession session, CaptureRequest request, TotalCaptureResult result) {
                     super.onCaptureCompleted(session, request, result);
-                    Toast.makeText(MainActivity.this, "Saved:" + file, Toast.LENGTH_SHORT).show();
+                    Toast.makeText(MainActivity.this, "Foto guardada", Toast.LENGTH_SHORT).show();
                     createCameraPreview();
                 }
             };
@@ -267,7 +248,6 @@ public class MainActivity extends AppCompatActivity {
             e.printStackTrace();
         }
     }
-
     public void createCameraPreview(){
         try {
             SurfaceTexture texture = textureView.getSurfaceTexture();
@@ -288,18 +268,15 @@ public class MainActivity extends AppCompatActivity {
                 }
                 @Override
                 public void onConfigureFailed(@NonNull CameraCaptureSession cameraCaptureSession){
-                    Toast.makeText(MainActivity.this, "ERROR", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(MainActivity.this, "Error", Toast.LENGTH_SHORT).show();
                 }
             },null);
         } catch (CameraAccessException e) {
             throw new RuntimeException(e);
         }
-
     }
-
     private void openCamera() {
         CameraManager manager = (CameraManager) getSystemService(Context.CAMERA_SERVICE);
-        Log.e(TAG, "is camera open");
         try {
             idCamara = manager.getCameraIdList()[0];
             CameraCharacteristics characteristics = manager.getCameraCharacteristics(idCamara);
@@ -314,13 +291,8 @@ public class MainActivity extends AppCompatActivity {
         } catch (CameraAccessException e) {
             e.printStackTrace();
         }
-        Log.e(TAG, "openCamera X");
     }
-
     protected void updatePreview() {
-        if (null == camaraD) {
-            Log.e(TAG, "updatePreview error, return");
-        }
         captureRB.set(CaptureRequest.CONTROL_MODE, CameraMetadata.CONTROL_MODE_AUTO);
         try {
             captureSession.setRepeatingRequest(captureRB.build(), null, handler);
@@ -328,23 +300,19 @@ public class MainActivity extends AppCompatActivity {
             e.printStackTrace();
         }
     }
-
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (requestCode == CAMERA_PERMISSION) {
             if (grantResults[0] == PackageManager.PERMISSION_DENIED) {
-                // close the app
-                Toast.makeText(MainActivity.this, "Sorry!!!, you can't use this app without granting permission", Toast.LENGTH_LONG).show();
+                Toast.makeText(MainActivity.this, "Para utilizar la app le tienes que aceptar los permissos de camara", Toast.LENGTH_LONG).show();
                 finish();
             }
         }
     }
-
     @Override
     protected void onResume() {
         super.onResume();
-        Log.e(TAG, "onResume");
         startBackgroundThread();
         if (textureView.isAvailable()) {
             openCamera();
@@ -352,10 +320,8 @@ public class MainActivity extends AppCompatActivity {
             textureView.setSurfaceTextureListener(textureListener);
         }
     }
-
     @Override
     protected void onPause() {
-        Log.e(TAG, "onPause");
         stopBackgroundThread();
         super.onPause();
     }
